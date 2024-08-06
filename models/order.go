@@ -7,14 +7,14 @@ import (
 )
 
 type Order struct {
-	ID               uint      `gorm:"primaryKey"`
-	ControlNumber    string    `gorm:"unique;not null"`
-	RegistrationDate time.Time `gorm:"not null"`
-	Name             string    `gorm:"not null"`
-	UnitPrice        float64   `gorm:"not null"`
-	Quantity         int       `gorm:"default:1"`
-	CustomerCode     int       `gorm:"not null"`
-	TotalValue       float64   `gorm:"not null"`
+	ID               uint      `gorm:"primaryKey" json:"id"`
+	ControlNumber    string    `gorm:"unique;not null" json:"control_number"`
+	RegistrationDate time.Time `gorm:"not null" json:"registration_date"`
+	Name             string    `gorm:"not null" json:"name"`
+	UnitPrice        float64   `gorm:"not null" json:"unit_price"`
+	Quantity         int       `gorm:"default:1" json:"quantity"`
+	CustomerCode     int       `gorm:"not null" json:"customer_code"`
+	TotalValue       float64   `gorm:"not null" json:"total_value"`
 }
 
 func (order *Order) BeforeCreate(tx *gorm.DB) (err error) {
@@ -24,11 +24,11 @@ func (order *Order) BeforeCreate(tx *gorm.DB) (err error) {
 	if order.Quantity == 0 {
 		order.Quantity = 1
 	}
-	order.TotalValue = order.calculateTotalValue()
+	order.TotalValue = order.CalculateTotalValue()
 	return
 }
 
-func (order *Order) calculateTotalValue() float64 {
+func (order *Order) CalculateTotalValue() float64 {
 	total := float64(order.Quantity) * order.UnitPrice
 	if order.Quantity >= 10 {
 		total *= 0.9 // 10% de desconto

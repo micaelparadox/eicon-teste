@@ -1,9 +1,11 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"test-eicon/models"
 	"test-eicon/services"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,13 +34,21 @@ func (ctrl *OrderController) CreateOrder(c *gin.Context) {
 		}
 	}
 
+	fmt.Printf("Received Orders: %+v\n", orders)
+
 	if len(orders) > 10 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Maximum 10 orders allowed"})
 		return
 	}
 
-	for _, order := range orders {
+	for i, order := range orders {
+		if order.RegistrationDate.IsZero() {
+			order.RegistrationDate = time.Now()
+		}
+		order.TotalValue = order.CalculateTotalValue()
+		fmt.Printf("Inspect Order: %+v\n", order)
 		if order.ControlNumber == "" || order.Name == "" || order.UnitPrice == 0 || order.CustomerCode == 0 {
+			fmt.Printf("Missing Fields in Order: %+v\n", order)
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Missing required fields"})
 			return
 		}
@@ -46,6 +56,7 @@ func (ctrl *OrderController) CreateOrder(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+		orders[i] = order
 	}
 
 	c.JSON(http.StatusOK, orders)

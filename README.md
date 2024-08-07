@@ -1,4 +1,4 @@
-### README.md (Portuguese - Brazil)
+### README.md
 
 
 # Projeto Eicon-Teste

@@ -18,17 +18,25 @@ func NewOrderController(service *services.OrderService) *OrderController {
 	return &OrderController{service: service}
 }
 
+type OrdersXMLWrapper struct {
+	Orders []models.Order `xml:"order"`
+}
+
 func (ctrl *OrderController) CreateOrder(c *gin.Context) {
 	var orders []models.Order
 
 	contentType := c.GetHeader("Content-Type")
 	if contentType == "application/xml" {
-		if err := c.ShouldBindXML(&orders); err != nil {
+		var ordersWrapper OrdersXMLWrapper
+		if err := c.ShouldBindXML(&ordersWrapper); err != nil {
+			fmt.Printf("Error binding XML: %v\n", err)
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+		orders = ordersWrapper.Orders
 	} else {
 		if err := c.ShouldBindJSON(&orders); err != nil {
+			fmt.Printf("Error binding JSON: %v\n", err)
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
@@ -56,7 +64,7 @@ func (ctrl *OrderController) CreateOrder(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		orders[i] = order
+		orders[i] = order // Atualiza o pedido com os dados preenchidos
 	}
 
 	c.JSON(http.StatusOK, orders)

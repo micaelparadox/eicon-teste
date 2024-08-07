@@ -36,7 +36,7 @@ func setupRouter() *gin.Engine {
 func TestCreateAndGetOrders(t *testing.T) {
 	router := setupRouter()
 
-	// Test creating orders
+	// Test creating orders (JSON)
 	orders := []map[string]interface{}{
 		{
 			"control_number": "111111",
@@ -110,4 +110,47 @@ func TestCreateAndGetOrders(t *testing.T) {
 	assert.Equal(t, "Produto A", responseByDate[0]["name"])
 	assert.Equal(t, "222222", responseByDate[1]["control_number"])
 	assert.Equal(t, "Produto B", responseByDate[1]["name"])
+
+	// Test creating orders (XML)
+	ordersXML := `<orders>
+    <order>
+        <control_number>333333</control_number>
+        <name>Produto C</name>
+        <unit_price>300.0</unit_price>
+        <quantity>3</quantity>
+        <customer_code>3</customer_code>
+    </order>
+    <order>
+        <control_number>444444</control_number>
+        <name>Produto D</name>
+        <unit_price>400.0</unit_price>
+        <quantity>7</quantity>
+        <customer_code>4</customer_code>
+    </order>
+</orders>`
+	req, _ = http.NewRequest("POST", "/orders", bytes.NewBuffer([]byte(ordersXML)))
+	req.Header.Set("Content-Type", "application/xml")
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	// Test getting all orders again
+	req, _ = http.NewRequest("GET", "/orders", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	err = json.Unmarshal(w.Body.Bytes(), &response)
+	assert.Nil(t, err)
+	assert.Equal(t, 4, len(response)) // Verificar o tamanho da resposta
+	assert.Equal(t, "111111", response[0]["control_number"])
+	assert.Equal(t, "Produto A", response[0]["name"])
+	assert.Equal(t, "222222", response[1]["control_number"])
+	assert.Equal(t, "Produto B", response[1]["name"])
+	assert.Equal(t, "333333", response[2]["control_number"])
+	assert.Equal(t, "Produto C", response[2]["name"])
+	assert.Equal(t, "444444", response[3]["control_number"])
+	assert.Equal(t, "Produto D", response[3]["name"])
 }

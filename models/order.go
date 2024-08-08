@@ -7,14 +7,14 @@ import (
 )
 
 type Order struct {
-	ID               uint      `gorm:"primaryKey" json:"id"`
-	ControlNumber    string    `gorm:"unique;not null" json:"control_number"`
-	RegistrationDate time.Time `gorm:"not null" json:"registration_date"`
-	Name             string    `gorm:"not null" json:"name"`
-	UnitPrice        float64   `gorm:"not null" json:"unit_price"`
-	Quantity         int       `gorm:"default:1" json:"quantity"`
-	CustomerCode     int       `gorm:"not null" json:"customer_code"`
-	TotalValue       float64   `gorm:"not null" json:"total_value"`
+	ID               uint      `gorm:"primaryKey" json:"id" xml:"id"`
+	ControlNumber    string    `gorm:"unique;not null" json:"control_number" xml:"control_number"`
+	RegistrationDate time.Time `gorm:"not null" json:"registration_date" xml:"registration_date"`
+	Name             string    `gorm:"not null" json:"name" xml:"name"`
+	UnitPrice        float64   `gorm:"not null" json:"unit_price" xml:"unit_price"`
+	Quantity         int       `gorm:"default:1" json:"quantity" xml:"quantity"`
+	CustomerCode     int       `gorm:"not null" json:"customer_code" xml:"customer_code"`
+	TotalValue       float64   `gorm:"not null" json:"total_value" xml:"total_value"`
 }
 
 func (order *Order) BeforeCreate(tx *gorm.DB) (err error) {
